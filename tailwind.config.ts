@@ -7,10 +7,17 @@ export default {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    fontFamily: {
+      'barlow': ['Barlow', 'sans-serif'],
+    },
     extend: {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        purple: "#4b3f72",
+        yellow: "#feb041",
+        dblue: "#014689",
+        lblue: "#67a6d3"
       },
     },
   },
