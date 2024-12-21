@@ -5,7 +5,7 @@ import * as faceapi from 'face-api.js';
 
 interface ReferenceFace {
   name: string;
-  profilePic: string;
+  imagePath: string;
 }
 
 const runFacialRecognition = async (
@@ -30,10 +30,11 @@ const runFacialRecognition = async (
   };
 
   const referenceFaces = await fetchReferenceFaces();
+  console.log("Reference faces:", referenceFaces);
 
   const labeledFaceDescriptors = await Promise.all(
     referenceFaces.map(async (refFace: ReferenceFace) => {
-      const img = await faceapi.fetchImage(refFace.profilePic);
+      const img = await faceapi.fetchImage(refFace.imagePath);
       const detections = await faceapi
         .detectAllFaces(img)
         .withFaceLandmarks()
