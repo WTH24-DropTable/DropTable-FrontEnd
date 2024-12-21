@@ -43,14 +43,6 @@ export default function Home() {
   
   return (
     <>
-        <Head>
-            <link rel="preconnect" href="https://fonts.googleapis.com" />
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-            <link
-            href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-            rel="stylesheet"
-            />
-        </Head>
         <div className="bg-black-900 font-barlow text-gray-700 h-screen p-6">
           <div className="flex h-full">
             {/* Left Container: Today's Lessons */}
@@ -217,20 +209,39 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            {/* Overlay Button */}
+            {/* Submit MC Button */}
             <button onClick={openModal} className="fixed bottom-8 right-8 bg-purple text-white text-xl font-barlow font-bold px-12 py-6 rounded-xl shadow-lg hover:bg-yellow hover:text-purple transition duration-300">
               
               Submit Medical Certificate
             </button>
 
-          {/* Modal */}
+          {/* Submit MC Modal */}
           {isModalOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-foreground p-6 rounded-lg w-[400px] text-center">
-                <h2 className="text-purple text-lg font-bold mb-4">
+            <div className="font-barlow fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+              <div className="bg-gray-800 flex flex-col justify-between items-center p-6 rounded-lg h-1/2 w-2/5 text-center">
+              <button
+                  onClick={closeModal}
+                  className="place-self-start text-white hover:text-gray-300 transition duration-300"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-8 w-8"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+                <h2 className="text-white text-2xl font-bold mb-4">
                   Upload Medical Certificate
                 </h2>
-                <div className="border-dashed border-2 border-gray-400 p-6 rounded-md mb-4">
+                <div className="flex flex-col justify-center border-dashed border-2 border-gray-400 p-6 rounded-md mb-4 w-5/6 h-3/5">
                   <div className="flex flex-col items-center justify-center">
                     <div className="w-12 h-12 bg-gray-500 rounded-full flex items-center justify-center mb-2">
                       <span className="text-white text-2xl">+</span>
@@ -240,12 +251,6 @@ export default function Home() {
                     <button className="text-blue-500 underline">browse</button>
                   </div>
                 </div>
-                <button
-                  onClick={closeModal}
-                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300"
-                >
-                  Close
-                </button>
               </div>
             </div>
           )}
