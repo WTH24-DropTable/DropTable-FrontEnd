@@ -1,6 +1,60 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import * as faceapi from 'face-api.js';
+
+const runFacialRecognition = async (canvasElement: HTMLCanvasElement) => {
+  // Load models
+  await Promise.all([
+    faceapi.nets.ssdMobilenetv1.loadFromUri('./models'),
+    faceapi.nets.faceLandmark68Net.loadFromUri('./models'),
+    faceapi.nets.faceRecognitionNet.loadFromUri('./models'),
+    faceapi.nets.ageGenderNet.loadFromUri('./models'),
+  ]);
+
+  const referenceFaces = [
+    { name: 'Hervin', imagePath: '/images/Hervin.jpg' },
+    { name: 'Ethan', imagePath: '/images/Ethan.png' },
+  ];
+  
+  const labeledFaceDescriptors = await Promise.all(
+    referenceFaces.map(async (refFace) => {
+      const img = await faceapi.fetchImage(refFace.imagePath);
+      const detections = await faceapi
+        .detectAllFaces(img)
+        .withFaceLandmarks()
+        .withFaceDescriptors();
+      return new faceapi.LabeledFaceDescriptors(
+        refFace.name,
+        detections.map((d) => d.descriptor)
+      );
+    })
+  );
+
+  if (!canvasElement) {
+    console.error('Canvas element not found');
+    return;
+  }
+
+  // Detect faces in the canvas
+  const facesToCheckAiData = await faceapi
+    .detectAllFaces(canvasElement)
+    .withFaceLandmarks()
+    .withFaceDescriptors();
+
+  const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
+  const resizedResults = faceapi.resizeResults(facesToCheckAiData, canvasElement);
+
+  resizedResults.forEach((face) => {
+    const { detection, descriptor } = face;
+    const label = faceMatcher.findBestMatch(descriptor).toString();
+
+    if (label.includes('unknown')) return;
+
+    const drawBox = new faceapi.draw.DrawBox(detection.box, { label });
+    drawBox.draw(canvasElement);
+  });
+};
 
 const CameraPage: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -43,6 +97,7 @@ const CameraPage: React.FC = () => {
       const context = canvas.getContext('2d');
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        runFacialRecognition(canvas); // Call the function directly after capturing the photo
       }
     }
   };
@@ -83,10 +138,11 @@ const CameraPage: React.FC = () => {
 
         {/* Canvas to Display Captured Photo */}
         <canvas
-          ref={canvasRef}
-          width={640}
-          height={480}
-          className="w-full max-w-md border border-gray-300 rounded-lg shadow-md"
+            id='canvas'
+            ref={canvasRef}
+            width={640}
+            height={480}
+            className="w-full max-w-md border border-gray-300 rounded-lg shadow-md"
         />
       </div>
     </div>
