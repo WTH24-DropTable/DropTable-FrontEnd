@@ -3,6 +3,11 @@
 import { useRef, useState, useEffect } from 'react';
 import * as faceapi from 'face-api.js';
 
+interface ReferenceFace {
+  name: string;
+  profilePic: string;
+}
+
 const runFacialRecognition = async (
   videoElement: HTMLVideoElement,
   canvasElement: HTMLCanvasElement
@@ -15,14 +20,20 @@ const runFacialRecognition = async (
     faceapi.nets.ageGenderNet.loadFromUri('./models'),
   ]);
 
-  const referenceFaces = [
-    { name: 'Hervin', imagePath: '/images/Hervin.jpg' },
-    { name: 'Ethan', imagePath: '/images/Ethan.png' },
-  ];
+  console.log("Models loaded");
+
+  const fetchReferenceFaces = async (): Promise<ReferenceFace[]> => {
+    const response = await fetch('http://localhost:8080/api/users/profilepic');
+    const data = await response.json();
+    console.log("Reference faces fetched:", data);
+    return data.links; // Assuming the API returns an object with a 'links' array
+  };
+
+  const referenceFaces = await fetchReferenceFaces();
 
   const labeledFaceDescriptors = await Promise.all(
-    referenceFaces.map(async (refFace) => {
-      const img = await faceapi.fetchImage(refFace.imagePath);
+    referenceFaces.map(async (refFace: ReferenceFace) => {
+      const img = await faceapi.fetchImage(refFace.profilePic);
       const detections = await faceapi
         .detectAllFaces(img)
         .withFaceLandmarks()
