@@ -8,15 +8,21 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { User } from "../../../../public/types/User";
 import { MedicalCertificate } from "../../../../public/types/MedicalCertificate";
+import Onboarding from "@/components/onboarding";
+import formatDate from "@/utils/formatDate";
 
 export default function Home() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [medicalCertificates, setMedicalCertificates] = useState<MedicalCertificate[] | null>([]);
+  const [mcFile, setMcFile] = useState<File | null>(null);
+  const [mcError, setMCError] = useState<string | null>(null);
+  const [userIsNew, setUserIsNew] = useState<boolean>(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+  const setUserNotNew = () => setUserIsNew(false);
 
   useEffect(() => {
     const id = sessionStorage.getItem("id");
@@ -25,7 +31,9 @@ export default function Home() {
     } else {
       axios.get(`http://localhost:8080/api/users/students/${id}`).then((res) => {
         if (res.status === 200) {
+          console.log(res.data.student);
           setUser(res.data.student);
+          setUserIsNew(res.data.student.isNew);
         }
       });
 
@@ -36,6 +44,28 @@ export default function Home() {
       })
     }
   }, [])
+
+  const handleMCUpload = async () => {
+    const form = new FormData();
+    form.append("userId", sessionStorage.getItem("id")!);
+    if (mcFile) {
+      form.append("mc", mcFile);
+    } else {
+      setMCError("Attach a File first!");
+      return;
+    }
+
+    axios.post(`http://localhost:8080/api/medicalcertificate/upload`, form, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      }
+    }).then((res) => {
+      if (res.status === 200) {
+        alert("Successfully uploaded Medical Certificate!");
+        setIsModalOpen(false);
+      }
+    });
+  }
 
   if (user === null) {
     return <></>;
@@ -110,7 +140,7 @@ export default function Home() {
                   </h2>
                   <div className="h-full flex items-center justify-between bg-gray-800 rounded-lg">
                       <div className="flex w-2/5 flex-col items-center justify-center">
-                        <Image src={user.profilePic} alt="Profile Picture" width={150} height={150} className="rounded-full m-3" />
+                        <Image src={user.profilePic ? user.profilePic : "https://placehold.co/400"} alt="Profile Picture" width={150} height={150} className="rounded-full m-3 aspect-square object-cover" />
                         <div className="text-white font-bold text-xl">
                           {user.name}
                         </div>
@@ -122,13 +152,13 @@ export default function Home() {
                           <p className="text-gray-400 text-lg">Attendance</p>
                         </div>
                         <div>
-                          <span className="font-bold text-white text-2xl">1/10</span>
+                          <span className="font-bold text-white text-2xl">{medicalCertificates?.filter((mc) => mc.status === "approved").length}/{medicalCertificates?.length}</span>
                           <p className="text-gray-400 text-lg">
                             Medical Certificates Approved
                           </p>
                         </div>
                         <div>
-                          <span className="font-bold text-white text-2xl">2</span>
+                          <span className="font-bold text-white text-2xl">{medicalCertificates?.filter((mc) => mc.status === "pending").length}</span>
                           <p className="text-gray-400 text-lg">Medical Certificates Pending</p>
                         </div>
                       </div>
@@ -190,7 +220,7 @@ export default function Home() {
                           className="flex justify-between items-center text-sm"
                         >
                           <div>
-                            <p className="text-white">{mc.startDate}</p>
+                            <p className="text-white">{formatDate(Number(mc.startDate))}</p>
                             <p className="block text-gray-400"><span className="font-medium">Duration: </span>{mc.duration} Day(s)</p>
                           </div>
                           <span
@@ -210,15 +240,14 @@ export default function Home() {
               </div>
             </div>
             {/* Submit MC Button */}
-            <button onClick={openModal} className="fixed bottom-8 right-8 bg-purple text-white text-xl font-barlow font-bold px-12 py-6 rounded-xl shadow-lg hover:bg-yellow hover:text-purple transition duration-300">
-              
+            <button onClick={openModal} className="fixed bottom-8 right-8 bg-purple text-white text-xl font-barlow font-bold px-10 py-3 rounded-xl shadow-lg hover:bg-yellow hover:text-purple transition duration-300">
               Submit Medical Certificate
             </button>
 
           {/* Submit MC Modal */}
           {isModalOpen && (
             <div className="font-barlow fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-              <div className="bg-gray-800 flex flex-col justify-between items-center p-6 rounded-lg h-1/2 w-2/5 text-center">
+              <div className="bg-gray-800 flex flex-col justify-between items-center p-6 rounded-lg w-2/5 text-center">
               <button
                   onClick={closeModal}
                   className="place-self-start text-white hover:text-gray-300 transition duration-300"
@@ -241,21 +270,47 @@ export default function Home() {
                 <h2 className="text-white text-2xl font-bold mb-4">
                   Upload Medical Certificate
                 </h2>
-                <div className="flex flex-col justify-center border-dashed border-2 border-gray-400 p-6 rounded-md mb-4 w-5/6 h-3/5">
+                <div className="flex flex-col justify-center border-dashed border-2 border-gray-400 p-6 rounded-md mb-4 w-5/6">
                   <div className="flex flex-col items-center justify-center">
                     <div className="w-12 h-12 bg-gray-500 rounded-full flex items-center justify-center mb-2">
                       <span className="text-white text-2xl">+</span>
                     </div>
                     <p className="text-gray-400">Drag and Drop Here</p>
                     <p className="text-gray-400">or</p>
-                    <button className="text-blue-500 underline">browse</button>
+
+                    <div className="flex items-center space-x-4 mt-2">
+                        <label 
+                          htmlFor="fileInput" 
+                          className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded shadow-md transition duration-300"
+                        >
+                          Upload File
+                        </label>
+                        <input 
+                          id="fileInput" 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden"
+                          onChange={(e) => setMcFile(e.target.files![0])} 
+                        />
+                        {mcFile && (
+                          <span className="text-neutral-300 text-sm">{mcFile.name}</span>
+                        )}
+                      </div>
                   </div>
                 </div>
+                <button 
+                  className="bg-green-700 hover:bg-green-800 text-white w-5/6 rounded-lg py-3 mb-4"
+                  onClick={() => handleMCUpload()}
+                >
+                    Submit
+                </button>
+                <p className="text-red-500 text-left font-medium">{ mcError }</p>
               </div>
             </div>
           )}
           </div>
         </div>
+        { userIsNew && <Onboarding setUserNotNew={setUserNotNew} /> }
     </>
   );
 }

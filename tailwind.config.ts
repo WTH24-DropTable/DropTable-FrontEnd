@@ -17,7 +17,8 @@ export default {
         purple: "#4b3f72",
         yellow: "#feb041",
         dblue: "#014689",
-        lblue: "#67a6d3"
+        lblue: "#67a6d3",
+        betterGreen: "#318848"
       },
     },
   },
