@@ -12,7 +12,7 @@ export default function Home() {
     { index: 5, name: 'Hervin Darmawan Sie', class: 'M01', status: 'ABSENT' },
   ];
 
-  const getStatusClass = (status) => {
+  const getStatusClass = (status: any) => {
     switch (status) {
       case 'ABSENT':
         return 'bg-red-400 text-red-900';
