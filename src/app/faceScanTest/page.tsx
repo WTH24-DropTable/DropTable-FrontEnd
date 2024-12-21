@@ -63,15 +63,19 @@ const runFacialRecognition = async (
     }
 
     resizedResults.forEach((face) => {
-      const { detection, descriptor } = face;
-      const label = faceMatcher.findBestMatch(descriptor).toString();
-
-      const drawBox = new faceapi.draw.DrawBox(detection.box, { label });
-      drawBox.draw(canvasElement);
-    });
-
-    requestAnimationFrame(detectFaces); // Continue detecting in a loop
-  };
+        const { detection, descriptor } = face;
+        const bestMatch = faceMatcher.findBestMatch(descriptor);
+        const label = bestMatch.toString();
+        const distance = bestMatch.distance;
+  
+        if (distance <= 0.40) {
+          const drawBox = new faceapi.draw.DrawBox(detection.box, { label });
+          drawBox.draw(canvasElement);
+        }
+      });
+  
+      requestAnimationFrame(detectFaces); // Continue detecting in a loop
+    };
 
   detectFaces();
 };
