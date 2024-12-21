@@ -2,6 +2,7 @@ import { DateOccurances } from "./DateOccurances";
 
 export interface Class {
     id: string,
+    className: string,
     name: string,
     startDateTime: number, // Date and Time of the First Class
     duration: number, // in minutes
