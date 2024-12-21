@@ -5,6 +5,11 @@ import React, { useState } from "react";
 
 export default function Home() {
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   const [selectedCertificate, setSelectedCertificate] = useState<number | null>(
     1
   );
@@ -121,7 +126,51 @@ export default function Home() {
             </button>
           </div>
         </div>
+        {/* Submit MC Button */}
+        <button onClick={openModal} className="fixed bottom-8 left-8 bg-purple text-white text-xl font-barlow font-bold px-12 py-6 rounded-xl shadow-lg hover:bg-yellow hover:text-purple transition duration-300">
+          Upload Master Sheet
+        </button>
       </div>
+
+      {/* Upload Master Sheet Modal */}
+      {isModalOpen && (
+            <div className="font-barlow fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+              <div className="bg-gray-800 flex flex-col justify-between items-center p-6 rounded-lg h-1/2 w-2/5 text-center">
+              <button
+                  onClick={closeModal}
+                  className="place-self-start text-white hover:text-gray-300 transition duration-300"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-8 w-8"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+                <h2 className="text-white text-2xl font-bold mb-4">
+                  Upload Master Sheet
+                </h2>
+                <div className="flex flex-col justify-center border-dashed border-2 border-gray-400 p-6 rounded-md mb-4 w-5/6 h-3/5">
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="w-12 h-12 bg-gray-500 rounded-full flex items-center justify-center mb-2">
+                      <span className="text-white text-2xl">+</span>
+                    </div>
+                    <p className="text-gray-400">Drag and Drop Here</p>
+                    <p className="text-gray-400">or</p>
+                    <button className="text-blue-500 underline">browse</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
     </div>
     </>
   );
