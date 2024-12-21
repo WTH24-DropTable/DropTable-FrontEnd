@@ -89,7 +89,10 @@ export default function Home() {
                     </h2>
                   <div className="bg-gray-600 p-6 rounded-xl space-y-6">
                     {classOccurances?.map((item, index) => (
-                      <div key={index} className="flex justify-between">
+                      <div
+                        key={index} className="flex justify-between cursor-pointer"
+                        onClick={() => router.push(`/lecturer/classlist?classId=${selectedClassId}&dateTime=${item.dateTime}`)}
+                      >
                         <div>
                           <p className="text-xl text-gray-400">{formatDate(item.dateTime)}</p>
                         </div>

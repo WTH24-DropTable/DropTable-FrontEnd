@@ -1,7 +1,8 @@
 export interface ClassAttendance {
     classId: string,
     dateTime: string,
-    attendedStudents: StudentAttendance[],
+    attendees: StudentAttendance[],
+    expectedAttendees: number
 }
 
 interface StudentAttendance {

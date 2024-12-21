@@ -1,11 +1,13 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation'
 import * as faceapi from 'face-api.js';
 
 interface ReferenceFace {
   name: string;
   imagePath: string;
+  userId: string;
 }
 
 const runFacialRecognition = async (
@@ -35,7 +37,7 @@ const runFacialRecognition = async (
         .withFaceLandmarks()
         .withFaceDescriptors();
       return new faceapi.LabeledFaceDescriptors(
-        refFace.name,
+        refFace.name + " " + refFace.userId,
         detections.map((d) => d.descriptor)
       );
     })
@@ -88,6 +90,18 @@ const CameraPage: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
+
+  // Search Params
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const classId = searchParams.get('classId');
+  const classTime = searchParams.get('classTime');
+
+  useEffect(() => {
+    if (!classId || !classTime) {
+      // router.push('/lecturer/home');
+    }
+  }, [])
 
   useEffect(() => {
     if (isCameraOn) {
