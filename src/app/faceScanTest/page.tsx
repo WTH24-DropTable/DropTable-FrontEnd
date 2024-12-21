@@ -3,7 +3,10 @@
 import { useRef, useState, useEffect } from 'react';
 import * as faceapi from 'face-api.js';
 
-const runFacialRecognition = async (canvasElement: HTMLCanvasElement) => {
+const runFacialRecognition = async (
+  videoElement: HTMLVideoElement,
+  canvasElement: HTMLCanvasElement
+) => {
   // Load models
   await Promise.all([
     faceapi.nets.ssdMobilenetv1.loadFromUri('./models'),
@@ -16,7 +19,7 @@ const runFacialRecognition = async (canvasElement: HTMLCanvasElement) => {
     { name: 'Hervin', imagePath: '/images/Hervin.jpg' },
     { name: 'Ethan', imagePath: '/images/Ethan.png' },
   ];
-  
+
   const labeledFaceDescriptors = await Promise.all(
     referenceFaces.map(async (refFace) => {
       const img = await faceapi.fetchImage(refFace.imagePath);
@@ -31,29 +34,38 @@ const runFacialRecognition = async (canvasElement: HTMLCanvasElement) => {
     })
   );
 
-  if (!canvasElement) {
-    console.error('Canvas element not found');
-    return;
-  }
-
-  // Detect faces in the canvas
-  const facesToCheckAiData = await faceapi
-    .detectAllFaces(canvasElement)
-    .withFaceLandmarks()
-    .withFaceDescriptors();
+  // Match canvas dimensions to the video
+  canvasElement.width = videoElement.videoWidth;
+  canvasElement.height = videoElement.videoHeight;
+  faceapi.matchDimensions(canvasElement, { width: videoElement.videoWidth, height: videoElement.videoHeight });
 
   const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
-  const resizedResults = faceapi.resizeResults(facesToCheckAiData, canvasElement);
 
-  resizedResults.forEach((face) => {
-    const { detection, descriptor } = face;
-    const label = faceMatcher.findBestMatch(descriptor).toString();
+  const detectFaces = async () => {
+    const facesToCheckAiData = await faceapi
+      .detectAllFaces(videoElement)
+      .withFaceLandmarks()
+      .withFaceDescriptors();
 
-    if (label.includes('unknown')) return;
+    const resizedResults = faceapi.resizeResults(facesToCheckAiData, { width: videoElement.videoWidth, height: videoElement.videoHeight });
 
-    const drawBox = new faceapi.draw.DrawBox(detection.box, { label });
-    drawBox.draw(canvasElement);
-  });
+    const context = canvasElement.getContext('2d');
+    if (context) {
+      context.clearRect(0, 0, canvasElement.width, canvasElement.height); // Clear canvas
+    }
+
+    resizedResults.forEach((face) => {
+      const { detection, descriptor } = face;
+      const label = faceMatcher.findBestMatch(descriptor).toString();
+
+      const drawBox = new faceapi.draw.DrawBox(detection.box, { label });
+      drawBox.draw(canvasElement);
+    });
+
+    requestAnimationFrame(detectFaces); // Continue detecting in a loop
+  };
+
+  detectFaces();
 };
 
 const CameraPage: React.FC = () => {
@@ -68,6 +80,13 @@ const CameraPage: React.FC = () => {
           const stream = await navigator.mediaDevices.getUserMedia({ video: true });
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
+
+            // Wait for the video to load metadata before starting facial recognition
+            videoRef.current.onloadedmetadata = () => {
+              if (videoRef.current && canvasRef.current) {
+                runFacialRecognition(videoRef.current, canvasRef.current);
+              }
+            };
           }
         } catch (err) {
           console.error('Error accessing the camera:', err);
@@ -90,18 +109,6 @@ const CameraPage: React.FC = () => {
     };
   }, [isCameraOn]);
 
-  const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      const context = canvas.getContext('2d');
-      if (context) {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        runFacialRecognition(canvas); // Call the function directly after capturing the photo
-      }
-    }
-  };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <h1 className="text-2xl font-bold text-gray-800 mb-4">Camera Page</h1>
@@ -118,7 +125,7 @@ const CameraPage: React.FC = () => {
       <div
         className={`mt-8 ${
           isCameraOn ? 'block' : 'hidden'
-        } flex flex-col items-center space-y-4`}
+        } flex flex-col items-center space-y-4 relative`}
       >
         {/* Video Feed */}
         <video
@@ -128,21 +135,10 @@ const CameraPage: React.FC = () => {
           className="w-full max-w-md border border-gray-300 rounded-lg shadow-md"
         />
 
-        {/* Capture Photo Button */}
-        <button
-          onClick={capturePhoto}
-          className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-md"
-        >
-          Capture Photo
-        </button>
-
-        {/* Canvas to Display Captured Photo */}
+        {/* Overlay Canvas */}
         <canvas
-            id='canvas'
-            ref={canvasRef}
-            width={640}
-            height={480}
-            className="w-full max-w-md border border-gray-300 rounded-lg shadow-md"
+          ref={canvasRef}
+          className="absolute top-0 left-0 w-full h-full border border-gray-300 rounded-lg shadow-md pointer-events-none"
         />
       </div>
     </div>
