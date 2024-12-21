@@ -1,9 +1,12 @@
 export interface User {
     id: string,
     name: string,
+    course: string,
+    email: string,
+    password: string,
     role: 'lecturer' | 'student' | 'admin',
     classes: string[],
-    profilePicUrl: string
+    profilePic: string,
 }
 
 export interface CreateUser {

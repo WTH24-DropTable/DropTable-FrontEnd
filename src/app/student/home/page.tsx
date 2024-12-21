@@ -3,13 +3,43 @@
 import Image from "next/image";
 import Head from "next/head";
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { User } from "../../../../public/types/User";
+import { MedicalCertificate } from "../../../../public/types/MedicalCertificate";
 
 export default function Home() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [medicalCertificates, setMedicalCertificates] = useState<MedicalCertificate[] | null>([]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+  useEffect(() => {
+    const id = sessionStorage.getItem("id");
+    if (id === undefined || id === null) {
+      router.push("/login");
+    } else {
+      axios.get(`http://localhost:8080/api/users/students/${id}`).then((res) => {
+        if (res.status === 200) {
+          setUser(res.data.student);
+        }
+      });
+
+      axios.get(`http://localhost:8080/api/medicalcertificate/${id}`).then((res) => {
+        if (res.status === 200) {
+          setMedicalCertificates(res.data.mcList);
+        }
+      })
+    }
+  }, [])
+
+  if (user === null) {
+    return <></>;
+  }
   
   return (
     <>
@@ -88,11 +118,11 @@ export default function Home() {
                   </h2>
                   <div className="h-full flex items-center justify-between bg-gray-800 rounded-lg">
                       <div className="flex w-2/5 flex-col items-center justify-center">
-                        <div className="w-48 h-48 rounded-full bg-gray-500 mb-4"></div>
+                        <Image src={user.profilePic} alt="Profile Picture" width={150} height={150} className="rounded-full m-3" />
                         <div className="text-white font-bold text-xl">
-                          Alfred Kang
+                          {user.name}
                         </div>
-                        <div className="text-gray-400 text-lg">Student</div>
+                        <div className="text-gray-400 text-lg">{user.role}</div>
                       </div>
                       <div className="flex justify-center flex-col w-3/5 h-full w-full rounded-r-lg bg-gray-900 space-y-2 text-sm text-center">
                         <div>
@@ -161,38 +191,27 @@ export default function Home() {
                   </h2>
                   <div className="h-full bg-gray-800 p-4 rounded-lg">
                     <div className="space-y-4">
-                      {[
-                        {
-                          date: "24/12/13",
-                          reason:
-                            "Left my cat at home and forgot to bring my pokemon cards",
-                          status: "REJECTED",
-                        },
-                        {
-                          date: "24/12/13",
-                          reason: "Forgot my grandma",
-                          status: "ACCEPTED",
-                        },
-                      ].map(({ date, reason, status }, index) => (
+                     {medicalCertificates?.length === 0 && (<p className="text-white">No Medical Certificates so far!</p>)} 
+                     {medicalCertificates?.map((mc, index) => (
                         <div
                           key={index}
                           className="flex justify-between items-center text-sm"
                         >
                           <div>
-                            <span className="text-white">{date}</span>
-                            <span className="block text-gray-400">{reason}</span>
+                            <p className="text-white">{mc.startDate}</p>
+                            <p className="block text-gray-400"><span className="font-medium">Duration: </span>{mc.duration} Day(s)</p>
                           </div>
                           <span
                             className={`font-bold ${
-                              status === "ACCEPTED"
+                              mc.status === 'approved'
                                 ? "text-green-500"
                                 : "text-red-500"
                             }`}
                           >
-                            {status}
+                            {mc.status}
                           </span>
                         </div>
-                      ))}
+                     ))}
                     </div>
                   </div>
                 </div>
