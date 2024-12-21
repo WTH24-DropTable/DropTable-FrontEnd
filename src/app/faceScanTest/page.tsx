@@ -25,12 +25,10 @@ const runFacialRecognition = async (
   const fetchReferenceFaces = async (): Promise<ReferenceFace[]> => {
     const response = await fetch('http://localhost:8080/api/users/profilepic');
     const data = await response.json();
-    console.log("Reference faces fetched:", data);
     return data.links;
   };
 
   const referenceFaces = await fetchReferenceFaces();
-  console.log("Reference faces:", referenceFaces);
 
   const labeledFaceDescriptors = await Promise.all(
     referenceFaces.map(async (refFace: ReferenceFace) => {
