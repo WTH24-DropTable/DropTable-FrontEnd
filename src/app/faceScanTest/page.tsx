@@ -20,8 +20,6 @@ const runFacialRecognition = async (
     faceapi.nets.ageGenderNet.loadFromUri('./models'),
   ]);
 
-  console.log("Models loaded");
-
   const fetchReferenceFaces = async (): Promise<ReferenceFace[]> => {
     const response = await fetch('http://localhost:8080/api/users/profilepic');
     const data = await response.json();
