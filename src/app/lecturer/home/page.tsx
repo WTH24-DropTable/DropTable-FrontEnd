@@ -63,7 +63,6 @@ export default function Home() {
           </div>
 
           <div className="flex mt-6">
-            {/* Classes Section */}
             <div className="w-1/4 mr-6">
               <h2 className="text-3xl font-semibold text-lblue mb-4">Classes</h2>
               <div className="space-y-4">

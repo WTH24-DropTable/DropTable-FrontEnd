@@ -28,7 +28,7 @@ export default function Home() {
     if (id === undefined || id === null) {
       router.push("/login");
     } else {
-      axios.get(`http://localhost:8080/api/users/students/${id}`).then((res) => {
+      axios.get(`http://localhost:8080/api/users/${id}`).then((res) => {
         if (res.status === 200) {
           console.log(res.data.student);
           setUser(res.data.student);
