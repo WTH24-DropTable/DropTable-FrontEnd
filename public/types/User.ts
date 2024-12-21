@@ -7,6 +7,7 @@ export interface User {
     role: 'lecturer' | 'student' | 'admin',
     classes: string[],
     profilePic: string,
+    isNew: boolean,
 }
 
 export interface CreateUser {
