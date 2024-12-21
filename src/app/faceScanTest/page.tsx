@@ -26,7 +26,7 @@ const runFacialRecognition = async (
     const response = await fetch('http://localhost:8080/api/users/profilepic');
     const data = await response.json();
     console.log("Reference faces fetched:", data);
-    return data.links; // Assuming the API returns an object with a 'links' array
+    return data.links;
   };
 
   const referenceFaces = await fetchReferenceFaces();
