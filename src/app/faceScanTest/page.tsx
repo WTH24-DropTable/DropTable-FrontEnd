@@ -5,7 +5,7 @@ import * as faceapi from 'face-api.js';
 
 interface ReferenceFace {
   name: string;
-  profilePic: string;
+  imagePath: string;
 }
 
 const runFacialRecognition = async (
@@ -20,12 +20,9 @@ const runFacialRecognition = async (
     faceapi.nets.ageGenderNet.loadFromUri('./models'),
   ]);
 
-  console.log("Models loaded");
-
   const fetchReferenceFaces = async (): Promise<ReferenceFace[]> => {
     const response = await fetch('http://localhost:8080/api/users/profilepic');
     const data = await response.json();
-    console.log("Reference faces fetched:", data);
     return data.links;
   };
 
@@ -33,7 +30,7 @@ const runFacialRecognition = async (
 
   const labeledFaceDescriptors = await Promise.all(
     referenceFaces.map(async (refFace: ReferenceFace) => {
-      const img = await faceapi.fetchImage(refFace.profilePic);
+      const img = await faceapi.fetchImage(refFace.imagePath);
       const detections = await faceapi
         .detectAllFaces(img)
         .withFaceLandmarks()
@@ -66,15 +63,19 @@ const runFacialRecognition = async (
     }
 
     resizedResults.forEach((face) => {
-      const { detection, descriptor } = face;
-      const label = faceMatcher.findBestMatch(descriptor).toString();
-
-      const drawBox = new faceapi.draw.DrawBox(detection.box, { label });
-      drawBox.draw(canvasElement);
-    });
-
-    requestAnimationFrame(detectFaces); // Continue detecting in a loop
-  };
+        const { detection, descriptor } = face;
+        const bestMatch = faceMatcher.findBestMatch(descriptor);
+        const label = bestMatch.toString();
+        const distance = bestMatch.distance;
+  
+        if (distance <= 0.40) {
+          const drawBox = new faceapi.draw.DrawBox(detection.box, { label });
+          drawBox.draw(canvasElement);
+        }
+      });
+  
+      requestAnimationFrame(detectFaces); // Continue detecting in a loop
+    };
 
   detectFaces();
 };
