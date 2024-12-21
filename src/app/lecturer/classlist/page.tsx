@@ -30,7 +30,7 @@ export default function Home() {
             <div className="h-24 flex items-center p-4 bg-purple text-white text-lg font-semibold">
               <button 
                 className="mr-4 text-white bg-transparent hover:bg-gray-700 p-4 rounded-lg"
-                onClick={() => window.history.back()} // Back button functionality
+                onClick={() => window.history.back()}
               >
                 ← Back
               </button>

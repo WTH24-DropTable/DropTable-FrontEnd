@@ -14,7 +14,7 @@ export default function Home() {
   const [medicalCertificates, setMedicalCertificates] = useState<MedicalCertificate[] | null>([]);
   const [selectedCertificate, setSelectedCertificate] = useState<string | null>(null);
 
-  const [file, setFile] = useState(null); // Store selected file
+  const [file, setFile] = useState(null);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -61,7 +61,6 @@ export default function Home() {
       const formData = new FormData();
       formData.append("file", file);
 
-      // Assuming your server has an endpoint for uploading
       axios.post("http://localhost:8080/api/admin/createUsers", formData)
         .then((response) => {
           console.log("File uploaded successfully", response);
@@ -205,7 +204,6 @@ export default function Home() {
         ) : (
           <p className="text-gray-400">Select a certificate to view details.</p>
         )}
-        {/* Submit MC Button */}
         <button
           onClick={openModal}
           className="fixed bottom-8 left-8 bg-purple text-white text-xl font-barlow font-bold px-12 py-6 rounded-xl shadow-lg hover:bg-yellow hover:text-purple transition duration-300"
@@ -239,7 +237,6 @@ export default function Home() {
             </button>
             <h2 className="text-white text-2xl font-bold mb-4">Upload Master Sheet</h2>
 
-            {/* File upload area */}
             <div className="flex flex-col justify-center border-dashed border-2 border-gray-400 p-6 rounded-md mb-4 w-5/6 h-3/5">
               <div className="flex flex-col items-center justify-center">
                 <div className="w-12 h-12 bg-gray-500 rounded-full flex items-center justify-center mb-2">
@@ -248,7 +245,6 @@ export default function Home() {
                 <p className="text-gray-400">Drag and Drop Here</p>
                 <p className="text-gray-400">or</p>
 
-                {/* File input with styling */}
                 <label htmlFor="fileUpload" className="text-blue-500 underline cursor-pointer">
                   browse
                 </label>
@@ -268,7 +264,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* Upload Button */}
             <button
               onClick={handleUpload}
               className="bg-blue-500 text-white p-2 rounded mt-4"

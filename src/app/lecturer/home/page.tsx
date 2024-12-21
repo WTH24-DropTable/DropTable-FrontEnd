@@ -7,7 +7,6 @@ export default function Home() {
           <h1 className="text-5xl font-bold text-lblue my-8">Welcome, Donovan Koh</h1>
 
           <div className="flex mt-6">
-            {/* Classes Section */}
             <div className="w-1/4 mr-6">
               <h2 className="text-3xl font-semibold text-lblue mb-4">Classes</h2>
               <div className="space-y-4">
@@ -31,13 +30,11 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Schedule Section */}
             <div className="flex-1">
               <h2 className="text-3xl font-semibold text-lblue mb-4">
                 Developing Dynamic Applications - M01
               </h2>
               <div className="bg-gray-600 p-6 rounded-xl space-y-6">
-                {/* Schedule Items */}
                 {[{
                   time: '12:00 - 13:00',
                   week: 'Week 08',
