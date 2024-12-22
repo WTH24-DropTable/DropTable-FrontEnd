@@ -74,11 +74,9 @@ const runFacialRecognition = async (
       }
 
       const data = await response.json();
-      console.log('Attendance marked:', data);
       setMessage('Attendance has been marked successfully!');
     } catch (error) {
-      console.error('Error marking attendance:', error);
-      setMessage('Failed to mark attendance.');
+      setMessage('Student not in class.');
     }
   };
 
