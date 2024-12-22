@@ -15,17 +15,17 @@ export default function Home() {
           HUMAN RESOURCES HAS <br /> NEVER BEEN SIMPLER.
         </h2>
         <p className="text-md text-gray-400 text-center mb-8">
-          FACE ID ATTENDANCE AUTOMATION, MEDICATION <br />
-          CERTIFICATE VERIFICATION AUTOMATION...BLAH
+          EFFORTLESS MANAGEMENT, INTUITIVE <br></br>
+          DESIGN, EFFECTIVE SOLUTIONS
         </p>
         <button className="px-12 py-4 rounded-md bg-yellow text-black font-semibold text-xl shadow-md hover:bg-yellow-400">
           Get started →
         </button>
       </section>
 
-      <section className="mt-8 w-11/12">
+      <section className="m-8 w-11/12">
         <img
-          src="https://via.placeholder.com/1200x600?text=Placeholder+Image"
+          src="landingpage.jpg"
           alt="Placeholder"
           className="w-full h-auto rounded-lg shadow-lg"
         />

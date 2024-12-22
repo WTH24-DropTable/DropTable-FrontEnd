@@ -20,6 +20,7 @@ export default function Home() {
   const [classAttendance, setClassAttendance] = useState([]);
   const [userIsNew, setUserIsNew] = useState<boolean>(false);
   const [refresh, setRefresh] = useState(false);
+  const [waitForMCUpload, setWaitForMCUpload] = useState(false);
   let id;
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -27,30 +28,30 @@ export default function Home() {
   function load(){
     axios.get(`http://localhost:8080/api/users/${id}`).then((res) => {
       if (res.status === 200) {
-      console.log(res.data.student);
-      
-      setUser(res.data.student);
-      setUserIsNew(res.data.student.isNew);
-    }
+        console.log(res.data.student);
+        
+        setUser(res.data.student);
+        setUserIsNew(res.data.student.isNew);
+      }
     });
-
+    
     axios.get(`http://localhost:8080/api/medicalcertificate/${id}`).then((res) => {
       if (res.status === 200) {
-      setMedicalCertificates(res.data.mcList);
-    }
+        setMedicalCertificates(res.data.mcList);
+      }
     })
   }
   useEffect( ()=>{
-if (user!==null){
-        
-        
-        getAttendance(user).then((res)=>{setClassAttendance(res)})
-        
-
-      }
+    if (user!==null){
+      
+      
+      getAttendance(user).then((res)=>{setClassAttendance(res)})
+      
+      
+    }
     console.log(classAttendance)
-
-
+    
+    
   },[user])
   async function getAttendance(user){
     console.log(user)
@@ -58,14 +59,14 @@ if (user!==null){
     for (let i=0; i<user.classes.length;i++){
       let cls=user.classes[i]
       let cattendance=await axios.get(`http://localhost:8080/api/attendance/${cls}/${user.id}`)
-        let clsN=await axios.get(`http://localhost:8080/api/class/class/${cls}`)
-        console.log(clsN)
+      let clsN=await axios.get(`http://localhost:8080/api/class/class/${cls}`)
+      console.log(clsN)
       console.log(cattendance)
       attendancebyClass.push({"class":clsN.data.classes.className,"data":cattendance.data})
-
+      
     }
     return attendancebyClass
-
+    
   }
   useEffect(()=>{console.log(classAttendance);;setRefresh(1);},[classAttendance])
   useEffect(() => {
@@ -76,8 +77,9 @@ if (user!==null){
       load()
     }
   }, [])
-
+  
   const handleMCUpload = async () => {
+    setWaitForMCUpload(true);
     const form = new FormData();
     form.append("userId", sessionStorage.getItem("id")!);
     if (mcFile) {
@@ -86,23 +88,24 @@ if (user!==null){
       setMCError("Attach a File first!");
       return;
     }
-
+    
     axios.post(`http://localhost:8080/api/medicalcertificate/upload`, form, {
       headers: {
-      "Content-Type": "multipart/form-data",
-    }
+        "Content-Type": "multipart/form-data",
+      }
     }).then((res) => {
       if (res.status === 200) {
         alert("Successfully uploaded Medical Certificate!");
         setIsModalOpen(false);
+        setWaitForMCUpload(false);
       }
     });
   }
-
+  
   if (user === null) {
     return <></>;
   }
-
+  
   return (
     <>
     <div className="bg-black-900 font-barlow text-gray-700 h-screen p-6">
@@ -112,22 +115,29 @@ if (user!==null){
     <h2 className="text-lblue text-2xl font-bold mb-2">Today's lessons</h2>
     <div className="bg-gray-800 p-4 h-full rounded-lg">
     <div className="space-y-4">
-    {[...Array(2)].map((_, index) => (
       <div
-      key={index}
-      className="text-sm flex justify-between items-center border-b border-white pb-2"
+      className="text-sm flex gap-5 items-center border-b border-white pb-2"
       >
-      <div className="text-gray-400">12:00 to 13:00</div>
+      <div className="text-gray-400">12:00 to 15:00</div>
       <div className="flex flex-col">
-      <span className="text-white">DEVELOPING AMONGUS</span>
+      <span className="text-white">Cloud Database Design</span>
       <span className="text-gray-400 text-xs">IPL, OAL</span>
       </div>
       </div>
-    ))}
-    </div>
-    </div>
-    </div>
 
+      <div
+      className="text-sm flex gap-5 items-center border-b border-white pb-2"
+      >
+      <div className="text-gray-400">15:00 to 18:00</div>
+      <div className="flex flex-col">
+      <span className="text-white">Programming I</span>
+      <span className="text-gray-400 text-xs">IPL, OAL</span>
+      </div>
+      </div>
+    </div>
+    </div>
+    </div>
+    
     {/* Right Container */}
     <div className="w-4/5 flex flex-col space-y-6 ml-6">
     {/* Right Top Container */}
@@ -137,6 +147,36 @@ if (user!==null){
     Attendance Summary
     </h2>
     <div className="bg-gray-800 p-4 h-full rounded-lg">
+                    <div className="space-y-4">
+                      {[
+                        { name: "Data Structures and Algorithm", score: 6 },
+                        { name: "iOS App Development", score: 10 },
+                        { name: "Cloud Database Design", score: 10 },
+                        { name: "Applied Chemistry", score: 5 },
+                        { name: "Programming I", score: 9 },
+                      ].map((lesson, index) => (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center text-sm"
+                        >
+                          <div>
+                            <span className="text-white">{lesson.name}</span>
+                            <span className="block text-gray-400 text-xs">
+                              IPL, OAL
+                            </span>
+                          </div>
+                          <span
+                            className={`${
+                              lesson.score >= 7 ? "text-green-500" : "text-red-500"
+                            }`}
+                          >
+                            {lesson.score}/10
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+    {/* <div className="bg-gray-800 p-4 h-full rounded-lg">
     <div className="space-y-4">
     { classAttendance.map((lesson,index) => (
       <div
@@ -156,9 +196,9 @@ if (user!==null){
       </div>
     ))}
     </div>
+    </div> */}
     </div>
-    </div>
-
+    
     <div className="flex flex-col w-3/5">
     <h2 className="text-lblue text-2xl font-bold mb-4">
     Student Information
@@ -173,7 +213,7 @@ if (user!==null){
     </div>
     <div className="flex justify-center flex-col w-3/5 h-full w-full rounded-r-lg bg-gray-900 space-y-2 text-sm text-center">
     <div>
-    <span className="font-bold text-white text-2xl">999/1000</span>
+    <span className="font-bold text-white text-2xl">35/50</span>
     <p className="text-gray-400 text-lg">Attendance</p>
     </div>
     <div>
@@ -190,7 +230,7 @@ if (user!==null){
     </div>
     </div>
     </div>
-
+    
     {/* Right Bottom Container */}
     <div className="flex h-1/2 space-x-6">
     <div className="flex flex-col w-3/5">
@@ -213,7 +253,52 @@ if (user!==null){
     </thead>
     <tbody>
     <tr>
+    <td className="text-white py-1">24/12/5 - 24/12/12</td>
+    {["7/10", "7/10", "7/10", "7/10", "7/10", "-", "-"].map(
+      (score, index) => (
+        <td
+        key={index}
+        className={`${
+          score === "-" ? "text-gray-400" : "text-green-500"
+        } py-1`}
+        >
+        {score}
+        </td>
+      )
+    )}
+    </tr>
+    <tr>
     <td className="text-white py-1">24/12/13 - 24/12/20</td>
+    {["7/10", "7/10", "7/10", "7/10", "7/10", "-", "-"].map(
+      (score, index) => (
+        <td
+        key={index}
+        className={`${
+          score === "-" ? "text-gray-400" : "text-green-500"
+        } py-1`}
+        >
+        {score}
+        </td>
+      )
+    )}
+    </tr>
+    <tr>
+    <td className="text-white py-1">24/12/21 - 24/12/28</td>
+    {["7/10", "9/10", "8/10", "10/10", "9/10", "-", "-"].map(
+      (score, index) => (
+        <td
+        key={index}
+        className={`${
+          score === "-" ? "text-gray-400" : "text-green-500"
+        } py-1`}
+        >
+        {score}
+        </td>
+      )
+    )}
+    </tr>
+    <tr>
+    <td className="text-white py-1">24/12/29 - 25/1/4</td>
     {["7/10", "7/10", "7/10", "7/10", "7/10", "-", "-"].map(
       (score, index) => (
         <td
@@ -231,7 +316,7 @@ if (user!==null){
     </table>
     </div>
     </div>
-
+    
     <div className="flex flex-col w-2/5">
     <h2 className="text-lblue text-2xl font-bold mb-4">
     Medical Certificates
@@ -251,8 +336,8 @@ if (user!==null){
       <span
       className={`font-bold ${
         mc.status === 'approved'
-          ? "text-green-500"
-          : "text-red-500"
+        ? "text-green-500"
+        : "text-red-500"
       }`}
       >
       {mc.status}
@@ -268,7 +353,7 @@ if (user!==null){
     <button onClick={openModal} className="fixed bottom-8 right-8 bg-purple text-white text-xl font-barlow font-bold px-10 py-3 rounded-xl shadow-lg hover:bg-yellow hover:text-purple transition duration-300">
     Submit Medical Certificate
     </button>
-
+    
     {/* Submit MC Modal */}
     {isModalOpen && (
       <div className="font-barlow fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
@@ -302,7 +387,7 @@ if (user!==null){
       </div>
       <p className="text-gray-400">Drag and Drop Here</p>
       <p className="text-gray-400">or</p>
-
+      
       <div className="flex items-center space-x-4 mt-2">
       <label
       htmlFor="fileInput"
@@ -316,26 +401,27 @@ if (user!==null){
       accept="image/*"
       className="hidden"
       onChange={(e) => setMcFile(e.target.files![0])}
-    />
-    {mcFile && (
+      />
+      {mcFile && (
         <span className="text-neutral-300 text-sm">{mcFile.name}</span>
-        )}
-    </div>
+      )}
+      </div>
       </div>
       </div>
       <button
       className="bg-green-700 hover:bg-green-800 text-white w-5/6 rounded-lg py-3 mb-4"
       onClick={() => handleMCUpload()}
-    >
-      Submit
+      disabled={waitForMCUpload}
+      >
+      {  waitForMCUpload ? "Uploading..." : "Upload" }
       </button>
       <p className="text-red-500 text-left font-medium">{ mcError }</p>
       </div>
       </div>
-      )}
+    )}
     </div>
-      </div>
-      { userIsNew && <Onboarding setUserNotNew={setUserNotNew} after={load} /> }
-      </>
-    );
+    </div>
+    { userIsNew && <Onboarding setUserNotNew={setUserNotNew} after={load} /> }
+    </>
+  );
 }
