@@ -25,7 +25,7 @@ export default function Home() {
       router.push("/login");
     } else {
       axios
-        .get(`http://localhost:8080/api/users/students/${id}`)
+        .get(`http://localhost:8080/api/users/${id}`)
         .then((res) => {
           if (res.status === 200) {
             setUser(res.data.student);
