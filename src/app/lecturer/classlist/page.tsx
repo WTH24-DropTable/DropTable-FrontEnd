@@ -75,7 +75,7 @@ export default function Home() {
               {modClass?.className} - {modClass?.name}
             </div>
 
-            <Link href={`http://localhost:3000/lecturer/scanAttendance?classId=${classId}&classTime=${dateTime}`}>
+            <Link href={`http://localhost:3000/lecturer/scanAttendance?classId=${classId}&dateTime=${dateTime}`}>
               <div className="absolute top-4 right-4 bg-yellow text-lg text-gray-600 font-bold px-4 py-2 rounded-lg shadow-lg cursor-pointer">
                 Scan Attendance
               </div>
