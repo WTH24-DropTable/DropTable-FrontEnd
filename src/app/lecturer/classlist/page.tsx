@@ -26,12 +26,14 @@ export default function Home() {
     axios.get(`http://localhost:8080/api/class/${classId}/students`).then((res) => {
       if (res.status === 200) {
         setStudents(res.data.students);
+        console.log(res.data.students);
       }
     });
 
     axios.get(`http://localhost:8080/api/class/${classId}/attendance/${dateTime}`).then((res) => {
       if (res.status === 200) {
         setAttendance(res.data.attendance);
+        console.log(res.data.attendance);
       }
     });
 
@@ -97,21 +99,15 @@ export default function Home() {
                     <td className="p-2 md:p-4 text-white text-sm md:text-base">{index + 1}</td>
                     <td className="p-2 md:p-4 text-white text-sm md:text-base">{student.name}</td>
                     <td>
-                      <div
-                        className={`w-full md:w-1/2 rounded-3xl font-bold text-center py-1 ${
-                          attendance?.attendees.some(
-                            (studentAttendance) => studentAttendance.studentId === student.id
-                          )
-                            ? "bg-green-400 text-green-900"
-                            : "bg-red-400 text-red-900"
-                        }`}
-                      >
-                        {attendance?.attendees.some(
-                          (studentAttendance) => studentAttendance.studentId === student.id
-                        )
-                          ? "Present"
-                          : "Absent"}
-                      </div>
+                      {attendance?.attendees.find((studentAttendance) => studentAttendance.userId === student.id) ? (
+                        <div className="w-full md:w-1/2 rounded-3xl font-bold text-center py-1 bg-green-400 text-green-900">
+                          Present
+                        </div>
+                      ) : (
+                        <div className="w-full md:w-1/2 rounded-3xl font-bold text-center py-1 bg-red-400 text-red-900">
+                          Absent
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

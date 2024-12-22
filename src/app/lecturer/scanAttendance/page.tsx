@@ -55,7 +55,7 @@ const runFacialRecognition = async (
 
   const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
 
-  const markAttendance = async (userId: string, stat: string) => {
+  const markAttendance = async (userId: string, stat: string, classId: string) => {
     try {
       const response = await fetch('http://localhost:8080/api/attendance/mark', {
         method: 'POST',
@@ -65,7 +65,8 @@ const runFacialRecognition = async (
         body: JSON.stringify({
           userId,
           occuranceId: `${classId}-${startDateTime}`,
-          stat
+          stat,
+          classId
         }),
       });
 
@@ -110,7 +111,7 @@ const runFacialRecognition = async (
         }
         const userId = label.split(' ')[2];
         if (userId && classId && startDateTime) {
-          markAttendance(userId, stat);
+          markAttendance(userId, stat, classId);
         }
 
         const drawBox = new faceapi.draw.DrawBox(detection.box, { label });

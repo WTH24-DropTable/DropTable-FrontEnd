@@ -6,6 +6,6 @@ export interface ClassAttendance {
 }
 
 interface StudentAttendance {
-    studentId: string,
+    userId: string,
     status: "present" | "late",
 }
