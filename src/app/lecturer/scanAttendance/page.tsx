@@ -194,7 +194,7 @@ const CameraPage: React.FC = () => {
       {/* Darkened and Blurred Background */}
       <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
         <div
-          className="relative rounded-full z-10 h-[75vh] w-[75vh]"
+          className="relative rounded-full z-10 h-[100vw] w-[100vw] md:h-[60vh] md:w-[60vh] lg:h-[75vh] lg:w-[75vh]"
           style={{ outline: '10000px solid rgba(0,0,0,0.8)' }}
         >
         </div>
@@ -205,10 +205,10 @@ const CameraPage: React.FC = () => {
         className="absolute top-0 left-0 w-full h-full pointer-events-none"
       />
 
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+      <div className="absolute bottom-8 w-full md:w-auto left-1/2 transform -translate-x-1/2 z-20">
         <button
           onClick={() => setIsCameraOn((prev) => !prev)}
-          className={`px-6 py-3 text-white font-bold rounded-md shadow-md transition-all ${
+          className={`px-6 py-3 text-white w-full md:w-auto font-bold rounded-md shadow-md transition-all ${
             isCameraOn ? 'bg-red-500 hover:bg-red-600' : 'bg-yellow hover:bg-feb041'
           }`}
         >
@@ -216,8 +216,8 @@ const CameraPage: React.FC = () => {
         </button>
       </div>
       {message && (
-        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 z-20">
-          <p className="text-yellow text-xl">{message}</p>
+        <div className="absolute sm:top-5 top-36 left-1/2 transform -translate-x-1/2 z-20 w-full text-center">
+          <p className="text-yellow text-xl font-bold">{message}</p>
         </div>
       )}
     </div>
