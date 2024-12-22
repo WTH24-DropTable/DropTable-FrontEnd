@@ -66,7 +66,7 @@ export default function Home() {
       <div className="min-h-screen w-full bg-gray-800 font-barlow text-dblue flex flex-col md:flex-row">
         {/* Left Container */}
         <div className="flex-1 relative">
-          <div className="h-24 flex items-center p-4 bg-purple text-white text-base md:text-lg font-semibold">
+          <div className="h-24 flex items-center p-4 bg-purple text-white text-xl md:text-lg font-semibold">
             <button
               className="mr-4 text-white bg-transparent hover:bg-gray-700 px-2 md:px-4 py-2 md:py-4 rounded-lg"
               onClick={() => window.history.back()}
@@ -77,7 +77,7 @@ export default function Home() {
           </div>
 
           <Link href={`http://localhost:3000/lecturer/scanAttendance?classId=${classId}&dateTime=${dateTime}`}>
-            <div className="md:absolute flex top-4 right-4 bg-yellow md:text-xs text-xl md:text-lg text-gray-600 font-bold px-3 py-4 md:px-4 md:py-2 md:rounded-lg rounded-b-lg shadow-lg cursor-pointer justify-center items-center">
+            <div className="md:absolute flex top-4 right-4 bg-yellow text-xl md:text-lg text-gray-600 font-bold px-3 py-4 md:px-4 md:py-2 md:rounded-lg rounded-b-lg shadow-lg cursor-pointer justify-center items-center">
               Scan Attendance
             </div>
           </Link>

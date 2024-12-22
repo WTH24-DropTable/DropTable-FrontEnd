@@ -218,8 +218,8 @@ const CameraPage: React.FC = () => {
         </button>
       </div>
       {message && (
-        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 z-20">
-          <p className="text-yellow text-xl">{message}</p>
+        <div className="absolute sm:top-5 top-36 left-1/2 transform -translate-x-1/2 z-20 w-full text-center">
+          <p className="text-yellow text-xl font-bold">{message}</p>
         </div>
       )}
     </div>
