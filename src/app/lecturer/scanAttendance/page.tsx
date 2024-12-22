@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation';
 import * as faceapi from 'face-api.js';
 
 interface ReferenceFace {
@@ -12,7 +12,10 @@ interface ReferenceFace {
 
 const runFacialRecognition = async (
   videoElement: HTMLVideoElement,
-  canvasElement: HTMLCanvasElement
+  canvasElement: HTMLCanvasElement,
+  classId: string | null,
+  startDateTime: string | null,
+  setMessage: (message: string) => void
 ) => {
   await Promise.all([
     faceapi.nets.ssdMobilenetv1.loadFromUri('../models'),
@@ -52,6 +55,33 @@ const runFacialRecognition = async (
 
   const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
 
+  const markAttendance = async (userId: string, stat: string) => {
+    try {
+      const response = await fetch('http://localhost:8080/api/attendance/mark', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          occuranceId: `${classId}-${startDateTime}`,
+          stat
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to mark attendance');
+      }
+
+      const data = await response.json();
+      console.log('Attendance marked:', data);
+      setMessage('Attendance has been marked successfully!');
+    } catch (error) {
+      console.error('Error marking attendance:', error);
+      setMessage('Failed to mark attendance.');
+    }
+  };
+
   const detectFaces = async () => {
     const facesToCheckAiData = await faceapi
       .detectAllFaces(videoElement)
@@ -63,7 +93,7 @@ const runFacialRecognition = async (
       height: videoElement.videoHeight,
     });
 
-    const context = canvasElement.getContext('2d');
+    const context = canvasElement.getContext('2d', { willReadFrequently: true });
     if (context) {
       context.clearRect(0, 0, canvasElement.width, canvasElement.height);
     }
@@ -75,8 +105,17 @@ const runFacialRecognition = async (
       const distance = bestMatch.distance;
 
       if (distance <= 0.40) {
+        let stat = 'PRESENT';
+        const startDateTimeNumber = new Date(startDateTime!).getTime(); // Convert startDateTime to number
+        if (Date.now() > startDateTimeNumber) {
+          stat = 'LATE';
+        }
+        const userId = label.split(' ')[2];
+        if (userId && classId && startDateTime) {
+          markAttendance(userId, stat);
+        }
+
         const drawBox = new faceapi.draw.DrawBox(detection.box, { label });
-        console.log(label)
         drawBox.draw(canvasElement);
       }
     });
@@ -91,6 +130,7 @@ const CameraPage: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
+  const [message, setMessage] = useState('');
 
   // Search Params
   const searchParams = useSearchParams();
@@ -102,7 +142,7 @@ const CameraPage: React.FC = () => {
     if (!classId || !dateTime) {
       router.push('/lecturer/home');
     }
-  }, [])
+  }, [classId, dateTime, router]);
 
   useEffect(() => {
     if (isCameraOn) {
@@ -114,7 +154,7 @@ const CameraPage: React.FC = () => {
 
             videoRef.current.onloadedmetadata = () => {
               if (videoRef.current && canvasRef.current) {
-                runFacialRecognition(videoRef.current, canvasRef.current);
+                runFacialRecognition(videoRef.current, canvasRef.current, classId, dateTime, setMessage);
               }
             };
           }
@@ -137,7 +177,7 @@ const CameraPage: React.FC = () => {
         tracks.forEach((track: MediaStreamTrack) => track.stop());
       }
     };
-  }, [isCameraOn]);
+  }, [isCameraOn, classId, dateTime]);
 
   return (
     <div className="relative w-full h-screen font-barlow">
@@ -160,7 +200,6 @@ const CameraPage: React.FC = () => {
           style={{ outline: '10000px solid rgba(0,0,0,0.8)' }}
         >
         </div>
-
       </div>
 
       <canvas
@@ -178,6 +217,11 @@ const CameraPage: React.FC = () => {
           {isCameraOn ? 'Turn Off Camera' : 'Turn On Camera'}
         </button>
       </div>
+      {message && (
+        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 z-20">
+          <p className="text-yellow text-xl">{message}</p>
+        </div>
+      )}
     </div>
   );
 };
