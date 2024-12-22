@@ -7,6 +7,7 @@ import { User } from "../../../../public/types/User";
 import axios from "axios";
 import { ClassAttendance } from "../../../../public/types/ClassAttendance";
 import { Class } from "../../../../public/types/Class";
+import Link from "next/link";
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -15,6 +16,7 @@ export default function Home() {
   const dateTime = searchParams.get('dateTime');
   const [students, setStudents] = useState<User[] | null>();
   const [attendance, setAttendance] = useState<ClassAttendance | null>();
+  const [modClass, setModClass] = useState<Class | null>();
 
   useEffect(() => {
     if (!classId || !dateTime) {
@@ -30,6 +32,12 @@ export default function Home() {
     axios.get(`http://localhost:8080/api/class/${classId}/attendance/${dateTime}`).then((res) => {
       if (res.status === 200) {
         setAttendance(res.data.attendance);
+      }
+    });
+
+    axios.get(`http://localhost:8080/api/class/${classId}`).then((res) => {
+      if (res.status === 200) {
+        setModClass(res.data.class);
       }
     });
   }, []);
@@ -64,12 +72,14 @@ export default function Home() {
               >
                 ← Back
               </button>
-              Developing Dynamic Applications - M01
+              {modClass?.className} - {modClass?.name}
             </div>
 
-            <div className="absolute top-4 right-4 bg-yellow text-lg text-gray-600 font-bold px-4 py-2 rounded-lg shadow-lg cursor-pointer">
-              Scan Attendance
-            </div>
+            <Link href={`http://localhost:3000/lecturer/scanAttendance?classId=${classId}&classTime=${dateTime}`}>
+              <div className="absolute top-4 right-4 bg-yellow text-lg text-gray-600 font-bold px-4 py-2 rounded-lg shadow-lg cursor-pointer">
+                Scan Attendance
+              </div>
+            </Link>
 
             <div className="p-6">
               <table className="w-full text-left border-collapse">
@@ -113,15 +123,6 @@ export default function Home() {
             <div className="flex flex-col justify-center items-center h-5/6">
               <div className="text-3xl font-semibold mb-4">Attendance</div>
               <div className="text-8xl text-green-500">{attendance?.attendees && attendance?.expectedAttendees ? (attendance.attendees.length / attendance.expectedAttendees) * 100 : 0}%</div>            
-            </div>
-            <div className="flex flex-col h-1/6 justify-end">
-                  <div className="flex">
-                    <Image src={"/pfpPlaceholder.png"} alt="Profile Picture" width={75} height={75} className="rounded-full m-3"/>
-                    <div className="flex justify-center flex-col">
-                      <div className="text-2xl font-semibold mb-1">Mr Donovan Koh</div>
-                      <div className="text-lg">Lecturer</div>    
-                    </div>        
-                  </div>
             </div>
           </div>
         </div>

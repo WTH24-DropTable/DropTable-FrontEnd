@@ -95,11 +95,11 @@ const CameraPage: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const classId = searchParams.get('classId');
-  const classTime = searchParams.get('classTime');
+  const dateTime = searchParams.get('dateTime');
 
   useEffect(() => {
-    if (!classId || !classTime) {
-      // router.push('/lecturer/home');
+    if (!classId || !dateTime) {
+      router.push('/lecturer/home');
     }
   }, [])
 
