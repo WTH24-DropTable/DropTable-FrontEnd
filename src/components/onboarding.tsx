@@ -7,7 +7,7 @@ import axios from "axios";
 interface IOnboarding {
   setUserNotNew: () => void;
 }
-export default function Onboarding({ setUserNotNew }: IOnboarding){
+export default function Onboarding({ setUserNotNew, load }: IOnboarding){
   const router = useRouter();
   const [imgsrc,setImgsrc]=useState("")
   const [imgCaptured, setimgCaptured]=useState(false)
@@ -43,6 +43,7 @@ export default function Onboarding({ setUserNotNew }: IOnboarding){
       if (res.status === 200) {
         setUploadSuccess(true);
         setUserNotNew();
+        load()
       }
     });
   }
