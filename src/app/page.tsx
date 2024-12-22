@@ -18,9 +18,9 @@ export default function Home() {
           EFFORTLESS MANAGEMENT, INTUITIVE <br></br>
           DESIGN, EFFECTIVE SOLUTIONS
         </p>
-        <button className="px-12 py-4 rounded-md bg-yellow text-black font-semibold text-xl shadow-md hover:bg-yellow-400">
+        <a href="/login" className="px-12 py-4 rounded-md bg-yellow text-black font-semibold text-xl shadow-md hover:bg-yellow-400">
           Get started →
-        </button>
+        </a>
       </section>
 
       <section className="m-8 w-11/12">

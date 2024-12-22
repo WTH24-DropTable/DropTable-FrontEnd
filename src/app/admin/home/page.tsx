@@ -90,8 +90,6 @@ export default function Home() {
                 console.log("Certificate selected:", cert);
                 if (cert.id) {
                   setSelectedCertificate(cert.id);
-                  console.log(selectedCertificate)
-                  console.log(medicalCertificates)
                 } else {
                   console.error("Invalid Certificate ID:", cert);
                 }
@@ -143,15 +141,13 @@ export default function Home() {
             </div>
             <div className="bg-gray-900 p-4 h-full rounded-lg text-gray-300">
               <h3 className="text-2xl p-2 font-bold">Medical Certificate</h3>
-              <Image
+              <img
                 src={
                   medicalCertificates.find((c) => c.id === selectedCertificate)
                     ?.imageUrl || "/mcPlaceholder.jpg"
                 }
                 alt="Medical Certificate"
-                width={720}
-                height={720}
-                className="p-4"
+                className="p-4 h-[63vh]"
               />
               <div className="mt-4 text-xl">
                 <p>
