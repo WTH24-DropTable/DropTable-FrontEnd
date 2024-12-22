@@ -76,6 +76,7 @@ const runFacialRecognition = async (
 
       if (distance <= 0.40) {
         const drawBox = new faceapi.draw.DrawBox(detection.box, { label });
+        console.log(label)
         drawBox.draw(canvasElement);
       }
     });
@@ -156,7 +157,7 @@ const CameraPage: React.FC = () => {
       <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
         <div
           className="relative rounded-full z-10 h-[75vh] w-[75vh]"
-          style={{ outline: '500px solid rgba(0,0,0,0.8)' }}
+          style={{ outline: '10000px solid rgba(0,0,0,0.8)' }}
         >
         </div>
 

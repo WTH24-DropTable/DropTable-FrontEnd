@@ -48,7 +48,7 @@ export default function Home() {
     return <></>;
   }
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: any) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
