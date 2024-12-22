@@ -81,7 +81,7 @@ export default function Home() {
 
             {/* Schedule Section */}
             <div className="flex-1">
-              { !selectedClassId && <h2 className="text-3xl font-semibold text-white mb-4 p-3 rounded-lg bg-gray-400 h-full">Select a Class to View Schedule</h2> }
+              { !selectedClassId && <h2 className="flex justify-center items-center text-3xl font-semibold text-white mb-4 p-3 w-full rounded-lg h-full">Select a Class to View Schedule</h2> }
               { selectedClassId && (
                 <div className="flex-1">
                     <h2 className="text-3xl font-semibold text-lblue mb-4">
