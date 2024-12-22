@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation';
 import * as faceapi from 'face-api.js';
 
 interface ReferenceFace {
@@ -12,7 +12,10 @@ interface ReferenceFace {
 
 const runFacialRecognition = async (
   videoElement: HTMLVideoElement,
-  canvasElement: HTMLCanvasElement
+  canvasElement: HTMLCanvasElement,
+  classId: string | null,
+  startDateTime: string | null,
+  setMessage: (message: string) => void
 ) => {
   await Promise.all([
     faceapi.nets.ssdMobilenetv1.loadFromUri('../models'),
@@ -52,6 +55,33 @@ const runFacialRecognition = async (
 
   const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
 
+  const markAttendance = async (userId: string, stat: string) => {
+    try {
+      const response = await fetch('http://localhost:8080/api/attendance/mark', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          occuranceId: `${classId}-${startDateTime}`,
+          stat
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to mark attendance');
+      }
+
+      const data = await response.json();
+      console.log('Attendance marked:', data);
+      setMessage('Attendance has been marked successfully!');
+    } catch (error) {
+      console.error('Error marking attendance:', error);
+      setMessage('Failed to mark attendance.');
+    }
+  };
+
   const detectFaces = async () => {
     const facesToCheckAiData = await faceapi
       .detectAllFaces(videoElement)
@@ -63,7 +93,7 @@ const runFacialRecognition = async (
       height: videoElement.videoHeight,
     });
 
-    const context = canvasElement.getContext('2d');
+    const context = canvasElement.getContext('2d', { willReadFrequently: true });
     if (context) {
       context.clearRect(0, 0, canvasElement.width, canvasElement.height);
     }
@@ -75,6 +105,16 @@ const runFacialRecognition = async (
       const distance = bestMatch.distance;
 
       if (distance <= 0.40) {
+        let stat = 'PRESENT';
+        const startDateTimeNumber = new Date(startDateTime!).getTime(); // Convert startDateTime to number
+        if (Date.now() > startDateTimeNumber) {
+          stat = 'LATE';
+        }
+        const userId = label.split(' ')[2];
+        if (userId && classId && startDateTime) {
+          markAttendance(userId, stat);
+        }
+
         const drawBox = new faceapi.draw.DrawBox(detection.box, { label });
         drawBox.draw(canvasElement);
       }
@@ -90,18 +130,19 @@ const CameraPage: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
+  const [message, setMessage] = useState('');
 
   // Search Params
   const searchParams = useSearchParams();
   const router = useRouter();
   const classId = searchParams.get('classId');
-  const classTime = searchParams.get('classTime');
+  const dateTime = searchParams.get('dateTime');
 
   useEffect(() => {
-    if (!classId || !classTime) {
-      // router.push('/lecturer/home');
+    if (!classId || !dateTime) {
+      router.push('/lecturer/home');
     }
-  }, [])
+  }, [classId, dateTime, router]);
 
   useEffect(() => {
     if (isCameraOn) {
@@ -113,7 +154,7 @@ const CameraPage: React.FC = () => {
 
             videoRef.current.onloadedmetadata = () => {
               if (videoRef.current && canvasRef.current) {
-                runFacialRecognition(videoRef.current, canvasRef.current);
+                runFacialRecognition(videoRef.current, canvasRef.current, classId, dateTime, setMessage);
               }
             };
           }
@@ -136,7 +177,7 @@ const CameraPage: React.FC = () => {
         tracks.forEach((track: MediaStreamTrack) => track.stop());
       }
     };
-  }, [isCameraOn]);
+  }, [isCameraOn, classId, dateTime]);
 
   return (
     <div className="relative w-full h-screen font-barlow">
@@ -155,11 +196,10 @@ const CameraPage: React.FC = () => {
       {/* Darkened and Blurred Background */}
       <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
         <div
-          className="relative rounded-full z-10 h-[75vh] w-[75vh]"
-          style={{ outline: '500px solid rgba(0,0,0,0.8)' }}
+          className="relative rounded-full z-10 h-[100vw] w-[100vw] md:h-[60vh] md:w-[60vh] lg:h-[75vh] lg:w-[75vh]"
+          style={{ outline: '10000px solid rgba(0,0,0,0.8)' }}
         >
         </div>
-
       </div>
 
       <canvas
@@ -167,16 +207,21 @@ const CameraPage: React.FC = () => {
         className="absolute top-0 left-0 w-full h-full pointer-events-none"
       />
 
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+      <div className="absolute bottom-8 w-full md:w-auto left-1/2 transform -translate-x-1/2 z-20">
         <button
           onClick={() => setIsCameraOn((prev) => !prev)}
-          className={`px-6 py-3 text-white font-bold rounded-md shadow-md transition-all ${
+          className={`px-6 py-3 text-white w-full md:w-auto font-bold rounded-md shadow-md transition-all ${
             isCameraOn ? 'bg-red-500 hover:bg-red-600' : 'bg-yellow hover:bg-feb041'
           }`}
         >
           {isCameraOn ? 'Turn Off Camera' : 'Turn On Camera'}
         </button>
       </div>
+      {message && (
+        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 z-20">
+          <p className="text-yellow text-xl">{message}</p>
+        </div>
+      )}
     </div>
   );
 };

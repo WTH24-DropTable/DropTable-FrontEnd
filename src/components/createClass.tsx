@@ -83,7 +83,7 @@ export default function CreateClass({ hideCreateClass }: ICreateClass) {
                     <input
                         type="text"
                         className="w-full bg-gray-700 rounded-lg p-2 mt-1"
-                        placeholder="Data Structures & Algorithms"
+                        placeholder="P01"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                     />
